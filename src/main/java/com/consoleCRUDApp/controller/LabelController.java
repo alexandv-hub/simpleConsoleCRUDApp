@@ -36,6 +36,11 @@ public class LabelController
     }
 
     @Override
+    public void cascadeUpdateEntity(Label updatedLabel) {
+        repository.update(updatedLabel);
+    }
+
+    @Override
     public void showEntitiesListFormatted(List<Label> activeEntities) {
         Character[] borderStyle = AsciiTable.FANCY_ASCII;
         List<ColumnData<Label>> columns = Label.getColumnData();
@@ -43,11 +48,22 @@ public class LabelController
         labelView.showInConsole(rend);
     }
 
+    public boolean checkIsLabelNameAlreadyExistInRepository(Label label) {
+        return repository.findAll().stream()
+                .anyMatch(existingLabel -> existingLabel.getName().equals(label.getName()));
+    }
+
     @Override
-    public void saveNewEntity(Label entity, String operationName) {
-        repository.save(entity);
-        repository.saveDataToRepositoryFile();
-        showInfoMessageEntityOperationFinishedSuccessfully(operationName, entity.getId());
+    public void saveNewEntity(Label newLabelToSave, String operationName) {
+        if (checkIsLabelNameAlreadyExistInRepository(newLabelToSave)) {
+            repository.save(newLabelToSave);
+            repository.saveDataToRepositoryFile();
+            showInfoMessageEntityOperationFinishedSuccessfully(operationName, newLabelToSave.getId());
+        }
+        else {
+            String entityClassSimpleName = repository.getEntityClass().getSimpleName();
+            showInfoMessageEntityAlreadyExists(entityClassSimpleName, "Name", newLabelToSave.getName());
+        }
     }
 
     @Override

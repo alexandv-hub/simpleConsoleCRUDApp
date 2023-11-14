@@ -13,6 +13,7 @@ import com.github.freva.asciitable.ColumnData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class PostController
         extends GenericEntityController<Post, GsonPostRepositoryImpl, PostView> {
@@ -40,7 +41,9 @@ public class PostController
     public Post prepareNewEntity(Long nextId, Status activeStatus) {
         String newPostTitle = postView.getUserInput(INPUT_THE_NEW_POST_TITLE);
         String newPostContent = postView.getUserInput(INPUT_THE_NEW_POST_CONTENT);
+
         List<Label> newPostLabelList = getPostLabelListFromUserInputs();
+        newPostLabelList = processPostLabels(newPostLabelList);
 
         return new Post(nextId,
                         activeStatus,
@@ -53,7 +56,9 @@ public class PostController
     public Post prepareNewEntity(Long nextPostId, Long nextLabelId) {
         String newPostTitle = postView.getUserInput(INPUT_THE_NEW_POST_TITLE);
         String newPostContent = postView.getUserInput(INPUT_THE_NEW_POST_CONTENT);
+
         List<Label> newPostLabelList = getPostLabelListFromUserInputs(nextLabelId);
+        newPostLabelList = processPostLabels(newPostLabelList);
 
         return new Post(nextPostId,
                         Status.ACTIVE,
@@ -73,30 +78,54 @@ public class PostController
     }
 
     @Override
+    public void cascadeUpdateEntity(Post updatedEntity) {
+        repository.update(updatedEntity);
+        updatedEntity.getLabels().forEach(labelRepository::save);
+        labelRepository.saveDataToRepositoryFile();
+    }
+
+    @Override
     public Post requestEntityUpdatesFromUser(Long id) {
         String updatedPostTitle = postView.getUserInput(INPUT_THE_POST_NEW_TITLE);
         String updatedPostContent = postView.getUserInput(INPUT_THE_POST_NEW_CONTENT);
 
-        List<Label> labelList = new ArrayList<>();
+        List<Label> updatedLabelList = new ArrayList<>();
         postView.showInConsole(
                 "Would you like to update the Post labels?");
         if (userConfirmsOperation()) {
-            labelList = getPostLabelListFromUserInputs();
+            updatedLabelList = getPostLabelListFromUserInputs();
         }
         else {
             Optional<Post> postOptional = repository.findById(id);
             if (postOptional.isPresent()) {
                 Post post = postOptional.get();
-                labelList = post.getLabels();
+                updatedLabelList = post.getLabels();
             }
         }
+
+        updatedLabelList = processPostLabels(updatedLabelList);
 
         return new Post(id,
                 Status.ACTIVE,
                 updatedPostTitle,
                 updatedPostContent,
-                labelList
+                updatedLabelList
         );
+    }
+
+    private List<Label> processPostLabels(List<Label> postLabels) {
+        return postLabels.stream()
+            .map(label -> {
+                if (!labelView.isEntityAlreadyExistInRepository(label)) {
+                    labelRepository.save(label);
+                    labelRepository.saveDataToRepositoryFile();
+                    return label;
+                } else {
+                    return labelRepository.findLabelByName(label.getName())
+                            .orElseThrow(() -> new RuntimeException("Label not found"));
+                }
+            })
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -108,15 +137,12 @@ public class PostController
     }
 
     @Override
-    public void saveNewEntity(Post entity, String operationName) {
+    public void saveNewEntity(Post newPostToSave, String operationName) {
 
-        entity.getLabels().forEach(labelRepository::save);
-        labelRepository.saveDataToRepositoryFile();
 
-        repository.save(entity);
+        repository.save(newPostToSave);
         repository.saveDataToRepositoryFile();
-
-        showInfoMessageEntityOperationFinishedSuccessfully(operationName, entity.getId());
+        showInfoMessageEntityOperationFinishedSuccessfully(operationName, newPostToSave.getId());
     }
 
     @Override

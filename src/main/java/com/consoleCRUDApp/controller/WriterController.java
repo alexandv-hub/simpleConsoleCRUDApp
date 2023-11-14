@@ -130,6 +130,16 @@ public class WriterController
     }
 
     @Override
+    public void cascadeUpdateEntity(Writer updatedWriter) {
+        repository.update(updatedWriter);
+        updatedWriter.getPosts().forEach(post -> {
+            postRepository.save(post);
+            post.getLabels().forEach(labelRepository::save);
+        });
+        labelRepository.saveDataToRepositoryFile();
+    }
+
+    @Override
     public void showEntitiesListFormatted(List<Writer> activeEntities) {
         Character[] borderStyle = AsciiTable.FANCY_ASCII;
         List<ColumnData<Writer>> columns = Writer.getColumnData();

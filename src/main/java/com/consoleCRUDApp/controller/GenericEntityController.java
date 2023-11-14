@@ -22,10 +22,11 @@ public abstract class GenericEntityController<T extends BaseEntity<Long>,
         this.baseEntityView = baseEntityView;
     }
 
-    public abstract T prepareNewEntity(Long generatedId, Status activeStatus);
-    public abstract T requestEntityUpdatesFromUser(Long id);
     public abstract void showEntitiesListFormatted(List<T> entities);
     public abstract void saveNewEntity(T entity, String operationName);
+    public abstract T prepareNewEntity(Long generatedId, Status activeStatus);
+    public abstract T requestEntityUpdatesFromUser(Long id);
+    public abstract void cascadeUpdateEntity(T updatedEntity);
 
     private void showInfoMessageEntityWithIdNotFound(Long id) {
         baseEntityView.outputEntityWithIdNotFound(id);
@@ -42,6 +43,12 @@ public abstract class GenericEntityController<T extends BaseEntity<Long>,
     void showInfoMessageEntityOperationFinishedSuccessfully(String operationName, Long id) {
         String entityClassSimpleName = repository.getEntityClass().getSimpleName();
         baseEntityView.outputEntityOperationFinishedSuccessfully(operationName, entityClassSimpleName, id);
+    }
+
+    void showInfoMessageEntityAlreadyExists(String entityClassSimpleName,
+                                            String entityFieldName,
+                                            String entityMainFieldStringValue) {
+        baseEntityView.outputMessageEntityAlreadyExists(entityClassSimpleName, entityFieldName, entityMainFieldStringValue);
     }
 
     @Override
@@ -129,7 +136,7 @@ public abstract class GenericEntityController<T extends BaseEntity<Long>,
         showInfoMessageYouAreAboutTo(updateOperationName, entityClassSimpleName, entity);
         if (userConfirmsOperation()) {
             T updatedEntity = requestEntityUpdatesFromUser(entity.getId());
-            repository.update(updatedEntity);
+            cascadeUpdateEntity(updatedEntity);
             repository.saveDataToRepositoryFile();
             showInfoMessageEntityOperationFinishedSuccessfully(updateOperationName, entity.getId());
         } else {

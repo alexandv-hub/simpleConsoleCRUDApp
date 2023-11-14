@@ -55,8 +55,20 @@ public abstract class BaseEntityView implements BaseView {
         showInConsole("\nYou are about to " + operationName + " " + entityClassName + " entity:\n" + entity.toStringEntityTableView());
     }
 
-    public void outputEntityOperationFinishedSuccessfully(String operationName, String entityClassSimpleName, Long id) {
-        showInConsole("\nOperation " + operationName + " " + entityClassSimpleName + " entity with ID='" + id + "' finished successfully!");
+    public void outputEntityOperationFinishedSuccessfully(String operationName,
+                                                          String entityClassSimpleName,
+                                                          Long id) {
+        showInConsole(
+                "\nOperation " + operationName + " " + entityClassSimpleName + " entity with ID='" + id
+                + "' finished successfully!");
+    }
+
+    public void outputMessageEntityAlreadyExists(String entityClassSimpleName,
+                                                 String entityFieldName,
+                                                 String entityMainFieldStringValue) {
+        showInConsole(
+                "\n" + entityClassSimpleName + " entity with " + entityFieldName + " '" + entityMainFieldStringValue
+                + "' already exits in repository!");
     }
 
     public void outputExitedFromMainMenu(String repositoryClassName) {

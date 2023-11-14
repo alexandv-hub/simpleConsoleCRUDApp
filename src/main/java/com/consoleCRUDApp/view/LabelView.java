@@ -51,4 +51,8 @@ public class LabelView extends BaseEntityView {
     public List<Label> getLabelNamesListFromUser() {
         return getLabelNamesListFromUser(null);
     }
+
+    public boolean isEntityAlreadyExistInRepository(Label label) {
+        return labelController.checkIsLabelNameAlreadyExistInRepository(label);
+    }
 }

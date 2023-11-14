@@ -7,6 +7,7 @@ import lombok.Getter;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 public class GsonLabelRepositoryImpl
@@ -24,4 +25,9 @@ public class GsonLabelRepositoryImpl
         return new TypeToken<List<Label>>() {}.getType();
     }
 
+    public Optional<Label> findLabelByName(String name) {
+        return idToEntityMap.values().stream()
+                .filter(label -> label.getName().equals(name))
+                .findAny();
+    }
 }
