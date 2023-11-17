@@ -2,26 +2,17 @@ package com.consoleCRUDApp.repository.gson;
 
 import com.consoleCRUDApp.model.Post;
 import com.consoleCRUDApp.repository.PostRepository;
-import com.google.gson.reflect.TypeToken;
 import lombok.Getter;
-
-import java.lang.reflect.Type;
-import java.util.List;
 
 @Getter
 public class GsonPostRepositoryImpl
                     extends GsonGenericRepositoryImpl<Post, Long>
                     implements PostRepository {
 
-    private final Class<Post> entityClass = Post.class;
+    private static final Class<Post> entityClass = Post.class;
+    private static final String POSTS_FILE_PATH = "src/main/resources/data/posts.json";
 
-    public GsonPostRepositoryImpl(Class<Post> entityClass, String filePath) {
-        super(entityClass, filePath);
+    public GsonPostRepositoryImpl() {
+        super(entityClass, POSTS_FILE_PATH);
     }
-
-    @Override
-    public Type getEntityTypeToken() {
-        return new TypeToken<List<Post>>() {}.getType();
-    }
-
 }

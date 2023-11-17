@@ -11,29 +11,45 @@ import java.util.List;
 
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-public class Label extends BaseEntity<Long> {
+@EqualsAndHashCode
+@AllArgsConstructor
+@Builder
+@ToString
+public class Label implements Entity {
+    private Long id;
+    private Status status;
     private String name;
 
-    public Label(Long id, Status status, String name) {
-        super(id, status);
-        this.name = name;
+    @Override
+    public String toStringTableViewWithIds() {
+        Character[] borderStyle = AsciiTable.FANCY_ASCII;
+        List<ColumnData<Label>> columns = getColumnDataWithIds();
+        return "\n" + AsciiTable.getTable(borderStyle, List.of(this), columns);
     }
 
     @Override
-    public String toStringEntityTableView() {
+    public String toStringTableViewEntityNoIds() {
         Character[] borderStyle = AsciiTable.FANCY_ASCII;
-        List<ColumnData<Label>> columns = getColumnData();
-        return AsciiTable.getTable(borderStyle, List.of(this), columns);
+        List<ColumnData<Label>> columns = getColumnDataNoIds();
+        return "\n" + AsciiTable.getTable(borderStyle, List.of(this), columns);
     }
 
-    public static List<ColumnData<Label>> getColumnData() {
+    public static List<ColumnData<Label>> getColumnDataWithIds() {
         return Arrays.asList(
                 new Column().header("ID")
                         .headerAlign(HorizontalAlign.CENTER)
                         .dataAlign(HorizontalAlign.CENTER)
                         .with(label -> String.valueOf(label.getId())),
+                new Column().header("Name")
+                        .headerAlign(HorizontalAlign.LEFT)
+                        .maxWidth(30)
+                        .dataAlign(HorizontalAlign.LEFT)
+                        .with(Label::getName)
+        );
+    }
+
+    private List<ColumnData<Label>> getColumnDataNoIds() {
+        return List.of(
                 new Column().header("Name")
                         .headerAlign(HorizontalAlign.LEFT)
                         .maxWidth(30)

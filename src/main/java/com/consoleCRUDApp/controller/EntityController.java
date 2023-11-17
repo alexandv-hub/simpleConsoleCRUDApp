@@ -14,7 +14,6 @@ public interface EntityController extends BaseController {
     String NO_USER_COMMAND = "n";
 
     String getEntityClassName();
-    long generateNextId();
 
     void showMenu();
     void createAndSaveNewEntity();

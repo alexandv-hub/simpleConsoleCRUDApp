@@ -1,6 +1,6 @@
 package com.consoleCRUDApp.view;
 
-import com.consoleCRUDApp.model.BaseEntity;
+import com.consoleCRUDApp.model.Entity;
 
 public abstract class BaseEntityView implements BaseView {
 
@@ -23,7 +23,7 @@ public abstract class BaseEntityView implements BaseView {
                 "6. Go back to Main menu");
     }
 
-    public Long requestEntityIdFromUser() {
+    public Long promptEntityIdFromUser() {
         Long entityId = null;
 
         while (entityId == null) {
@@ -43,6 +43,7 @@ public abstract class BaseEntityView implements BaseView {
         return entityId;
     }
 
+
     public void outputEntityWithIdNotFound(Long id) {
         showInConsole("\nEntity with ID '" + id + "' not found!");
     }
@@ -51,8 +52,8 @@ public abstract class BaseEntityView implements BaseView {
         showInConsole("\n" + entityClassSimpleName + " entity " + currOperationName + " has been cancelled!");
     }
 
-    public <T extends BaseEntity<Long>> void outputYouAreAboutTo(String operationName, String entityClassName, T entity) {
-        showInConsole("\nYou are about to " + operationName + " " + entityClassName + " entity:\n" + entity.toStringEntityTableView());
+    public void outputYouAreAboutTo(String operationName, String entityClassName, Entity entity) {
+        showInConsole("\nYou are about to " + operationName + " " + entityClassName + " entity: " + entity.toStringTableViewEntityNoIds());
     }
 
     public void outputEntityOperationFinishedSuccessfully(String operationName,
@@ -75,7 +76,4 @@ public abstract class BaseEntityView implements BaseView {
         showInConsole("Exited from " + repositoryClassName + " menu.");
     }
 
-    public void outputDataSavedToFileSuccessfully(String fileName) {
-        showInConsole("Updated data successfully saved to " + fileName + ".");
-    }
 }

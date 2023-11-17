@@ -25,8 +25,7 @@ public class MainView implements BaseView {
 
         mainMenuController.exit();
         close();
-        showInConsole(
-                "Console CRUD Application terminated successfully.");
+        showInConsole("Console CRUD Application terminated successfully.");
 
     }
 

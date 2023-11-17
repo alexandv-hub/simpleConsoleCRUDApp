@@ -3,9 +3,6 @@ package com.consoleCRUDApp;
 import com.consoleCRUDApp.controller.LabelController;
 import com.consoleCRUDApp.controller.PostController;
 import com.consoleCRUDApp.controller.WriterController;
-import com.consoleCRUDApp.model.Label;
-import com.consoleCRUDApp.model.Post;
-import com.consoleCRUDApp.model.Writer;
 import com.consoleCRUDApp.repository.gson.GsonLabelRepositoryImpl;
 import com.consoleCRUDApp.repository.gson.GsonPostRepositoryImpl;
 import com.consoleCRUDApp.repository.gson.GsonWriterRepositoryImpl;
@@ -20,18 +17,14 @@ public class ApplicationContext {
     @Getter
     private static ApplicationContext instance = new ApplicationContext();
 
-    private final String writersFilePath = "src/main/resources/data/writers.json";
-    private final String postsFilePath = "src/main/resources/data/posts.json";
-    private final String labelsFilePath = "src/main/resources/data/labels.json";
-
-    private final WriterController writerController;
-    private final PostController postController;
     private final LabelController labelController;
+    private final PostController postController;
+    private final WriterController writerController;
 
     private ApplicationContext() {
-        GsonLabelRepositoryImpl labelRepository = new GsonLabelRepositoryImpl(Label.class, labelsFilePath);
-        GsonPostRepositoryImpl postRepository = new GsonPostRepositoryImpl(Post.class, postsFilePath);
-        GsonWriterRepositoryImpl writerRepository = new GsonWriterRepositoryImpl(Writer.class, writersFilePath);
+        GsonLabelRepositoryImpl labelRepository = new GsonLabelRepositoryImpl();
+        GsonPostRepositoryImpl postRepository = new GsonPostRepositoryImpl();
+        GsonWriterRepositoryImpl writerRepository = new GsonWriterRepositoryImpl();
 
         WriterView writerView = new WriterView();
         PostView postView = new PostView();

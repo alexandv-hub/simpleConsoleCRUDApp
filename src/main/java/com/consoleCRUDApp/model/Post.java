@@ -12,28 +12,32 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-public class Post extends BaseEntity<Long> {
+@EqualsAndHashCode
+@AllArgsConstructor
+@ToString
+@Builder
+public class Post implements Entity {
+    private Long id;
+    private Status status;
     private String title;
     private String content;
     private List<Label> labels;
 
-    public Post(Long id, Status status, String title, String content, List<Label> labels) {
-        super(id, status);
-        this.title = title;
-        this.content = content;
-        this.labels = labels;
+    @Override
+    public String toStringTableViewWithIds() {
+        Character[] borderStyle = AsciiTable.FANCY_ASCII;
+        List<ColumnData<Post>> columns = getColumnDataWithIds();
+        return "\n" + AsciiTable.getTable(borderStyle, List.of(this), columns);
     }
 
     @Override
-    public String toStringEntityTableView() {
+    public String toStringTableViewEntityNoIds() {
         Character[] borderStyle = AsciiTable.FANCY_ASCII;
-        List<ColumnData<Post>> columns = getColumnData();
-        return AsciiTable.getTable(borderStyle, List.of(this), columns);
+        List<ColumnData<Post>> columns = getColumnDataNoIds();
+        return "\n" + AsciiTable.getTable(borderStyle, List.of(this), columns);
     }
 
-    public static List<ColumnData<Post>> getColumnData() {
+    public static List<ColumnData<Post>> getColumnDataWithIds() {
         return Arrays.asList(
                 new Column().header("ID")
                         .headerAlign(HorizontalAlign.CENTER)
@@ -49,7 +53,7 @@ public class Post extends BaseEntity<Long> {
                         .maxWidth(30)
                         .dataAlign(HorizontalAlign.LEFT)
                         .with(Post::getContent),
-                new Column().header("Labels (name(id))")
+                new Column().header("Labels (Name(id))")
                         .headerAlign(HorizontalAlign.LEFT)
                         .maxWidth(50)
                         .dataAlign(HorizontalAlign.LEFT)
@@ -58,4 +62,27 @@ public class Post extends BaseEntity<Long> {
                                 .collect(Collectors.joining(", ")))
         );
     }
+
+    private List<ColumnData<Post>> getColumnDataNoIds() {
+        return Arrays.asList(
+                new Column().header("Title")
+                        .headerAlign(HorizontalAlign.LEFT)
+                        .maxWidth(30)
+                        .dataAlign(HorizontalAlign.LEFT)
+                        .with(Post::getTitle),
+                new Column().header("Content")
+                        .headerAlign(HorizontalAlign.LEFT)
+                        .maxWidth(30)
+                        .dataAlign(HorizontalAlign.LEFT)
+                        .with(Post::getContent),
+                new Column().header("Labels (name)")
+                        .headerAlign(HorizontalAlign.LEFT)
+                        .maxWidth(50)
+                        .dataAlign(HorizontalAlign.LEFT)
+                        .with(post -> post.getLabels().stream()
+                                .map(Label::getName)
+                                .collect(Collectors.joining(", ")))
+        );
+    }
+
 }

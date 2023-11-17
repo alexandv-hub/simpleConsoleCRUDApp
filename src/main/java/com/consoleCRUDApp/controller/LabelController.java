@@ -7,7 +7,6 @@ import com.consoleCRUDApp.view.LabelView;
 import com.github.freva.asciitable.AsciiTable;
 import com.github.freva.asciitable.ColumnData;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class LabelController
@@ -24,40 +23,18 @@ public class LabelController
     }
 
     @Override
-    public Label prepareNewEntity(Long nextId, Status activeStatus) {
-        String newLabelName = labelView.getLabelNameUserInput();
-        return new Label(nextId, activeStatus, newLabelName);
-    }
+    public Label prepareNewEntity() {
+        String newLabelName = labelView.promptNewLabelNameFromUser();
 
-    @Override
-    public Label requestEntityUpdatesFromUser(Long id) {
-        String updatedLabelName = labelView.getUserInput(INPUT_THE_LABEL_NEW_NAME);
-        return new Label(id, Status.ACTIVE, updatedLabelName);
-    }
-
-    @Override
-    public void cascadeUpdateEntity(Label updatedLabel) {
-        repository.update(updatedLabel);
-    }
-
-    @Override
-    public void showEntitiesListFormatted(List<Label> activeEntities) {
-        Character[] borderStyle = AsciiTable.FANCY_ASCII;
-        List<ColumnData<Label>> columns = Label.getColumnData();
-        String rend = AsciiTable.getTable(borderStyle, activeEntities, columns);
-        labelView.showInConsole(rend);
-    }
-
-    public boolean checkIsLabelNameAlreadyExistInRepository(Label label) {
-        return repository.findAll().stream()
-                .anyMatch(existingLabel -> existingLabel.getName().equals(label.getName()));
+        return Label.builder()
+                .name(newLabelName)
+                .build();
     }
 
     @Override
     public void saveNewEntity(Label newLabelToSave, String operationName) {
-        if (checkIsLabelNameAlreadyExistInRepository(newLabelToSave)) {
+        if (!repository.isEntityExistInRepository(newLabelToSave)) {
             repository.save(newLabelToSave);
-            repository.saveDataToRepositoryFile();
             showInfoMessageEntityOperationFinishedSuccessfully(operationName, newLabelToSave.getId());
         }
         else {
@@ -67,24 +44,31 @@ public class LabelController
     }
 
     @Override
-    public String getEntityClassName() {
-        return ENTITY_CLASS_NAME;
+    public Label requestEntityUpdatesFromUser(Long id) {
+        String updatedLabelName = labelView.getUserInput(INPUT_THE_LABEL_NEW_NAME);
+
+        return Label.builder()
+                .id(id)
+                .name(updatedLabelName)
+                .status(Status.ACTIVE)
+                .build();
     }
 
-    public List<Label> promptLabelNamesListFromUser(Long startId) {
-        List<Label> labelsListFromUserInput = new ArrayList<>();
-        int counter = 1;
-        long newLabelNextId = (startId != null) ? startId : generateNextId();
+    @Override
+    public void showEntitiesListFormatted(List<Label> activeEntities) {
+        Character[] borderStyle = AsciiTable.FANCY_ASCII;
+        List<ColumnData<Label>> columns = Label.getColumnDataWithIds();
+        String rend = AsciiTable.getTable(borderStyle, activeEntities, columns);
+        labelView.showInConsole(rend);
+    }
 
-        String postLabelName = labelView.promptForLabelName(counter);
-        while (!postLabelName.isBlank()) {
-            Label newLabelEntity = new Label(newLabelNextId, Status.ACTIVE, postLabelName);
-            labelsListFromUserInput.add(newLabelEntity);
+    @Override
+    public void cascadeUpdateEntity(Label updatedLabel) {
+        repository.update(updatedLabel);
+    }
 
-            counter++;
-            newLabelNextId++;
-            postLabelName = labelView.promptForLabelName(counter);
-        }
-        return labelsListFromUserInput;
+    @Override
+    public String getEntityClassName() {
+        return ENTITY_CLASS_NAME;
     }
 }
